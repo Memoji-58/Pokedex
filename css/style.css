@@ -17,7 +17,10 @@ body {
     min-height: 100vh;
     font-family: 'Segoe UI', Arial, sans-serif;
     color: var(--white);
-    background: radial-gradient(circle at 80% 20%, #102e38 0, #06171e 28rem);
+    background-color: var(--page);
+    background-image:
+        url("../assets/images/pokedex-pattern.svg"),
+        radial-gradient(circle at 80% 20%, #102e38 0, #06171e 28rem);
 }
 
 body.dialog-open {
@@ -133,9 +136,9 @@ button:disabled {
     font-weight: 800;
 }
 
-.search-form button svg {
+.search-form button img {
     width: 21px;
-    fill: currentColor;
+    height: 21px;
 }
 
 main {

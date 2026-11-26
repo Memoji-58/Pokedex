@@ -24,6 +24,8 @@ window.addEventListener('DOMContentLoaded', function () {
     }
 
     function addNewPokemon(pokemonList) {
+        const searchIsActive = searchInput.value.trim().length >= 3;
+
         for (let i = 0; i < pokemonList.length; i++) {
             let alreadyLoaded = false;
 
@@ -36,8 +38,11 @@ window.addEventListener('DOMContentLoaded', function () {
 
             if (!alreadyLoaded) {
                 loadedPokemon.push(pokemonList[i]);
-                displayedPokemon.push(pokemonList[i]);
-                renderPokemonCards([pokemonList[i]]);
+
+                if (!searchIsActive) {
+                    displayedPokemon.push(pokemonList[i]);
+                    renderPokemonCards([pokemonList[i]]);
+                }
             }
         }
     }
@@ -60,7 +65,7 @@ window.addEventListener('DOMContentLoaded', function () {
     }
 
     async function loadMorePokemon() {
-        if (isLoadingMore) {
+        if (isLoadingMore || searchInput.value.trim().length >= 3) {
             return;
         }
 
@@ -72,7 +77,9 @@ window.addEventListener('DOMContentLoaded', function () {
             const newPokemon = await loadPokemon(nextOffset);
             addNewPokemon(newPokemon);
             nextOffset += 30;
-            clearStatusMessage();
+            if (searchInput.value.trim().length < 3) {
+                clearStatusMessage();
+            }
         } catch (error) {
             showLoadingMessage('More Pokémon could not be loaded. Your current list is unchanged.');
         }
@@ -117,7 +124,6 @@ window.addEventListener('DOMContentLoaded', function () {
         const currentSearch = searchNumber;
         showNotFoundMessage(false);
         showLoadingMessage('Searching Pokémon...');
-        loadMoreButton.hidden = true;
 
         try {
             const results = await findMatchingPokemon(searchText);
@@ -127,6 +133,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
             displayedPokemon = results;
             replacePokemonCards(displayedPokemon);
+            loadMoreButton.hidden = true;
             if (results.length === 0) {
                 showNotFoundMessage(true);
             }
@@ -136,16 +143,25 @@ window.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            showLoadingMessage('Search could not be completed. Please try again.');
+            if (error.status === 404) {
+                displayedPokemon = [];
+                replacePokemonCards(displayedPokemon);
+                showNotFoundMessage(true);
+                loadMoreButton.hidden = true;
+                clearStatusMessage();
+            } else {
+                showLoadingMessage('Search could not be completed. Please try again.');
+                loadMoreButton.hidden = false;
+            }
         }
     }
 
     function handleSearchInput() {
         updateSearchButton();
         clearTimeout(searchTimer);
+        searchNumber++;
 
         if (searchInput.value.trim().length < 3) {
-            searchNumber++;
             displayedPokemon = loadedPokemon.slice();
             replacePokemonCards(displayedPokemon);
             showNotFoundMessage(false);
@@ -154,6 +170,8 @@ window.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        loadMoreButton.hidden = true;
+        showNotFoundMessage(false);
         searchTimer = setTimeout(searchPokemon, 250);
     }
 

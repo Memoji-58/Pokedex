@@ -3,9 +3,11 @@ const closeDialogButton = document.querySelector('#close-dialog-button');
 const previousPokemonButton = document.querySelector('#prev-button');
 const nextPokemonButton = document.querySelector('#next-button');
 const evolutionButton = document.querySelector('#evolution-button');
+const dialogPokemonImage = document.querySelector('#dialog-image');
 let dialogPokemonList = [];
 let dialogPokemonIndex = 0;
 let previouslyFocusedElement = null;
+let evolutionRequestNumber = 0;
 
 function openPokemonDialog(pokemon, pokemonList, cardButton) {
     dialogPokemonList = pokemonList;
@@ -65,9 +67,11 @@ function handleDialogKeyboard(event) {
         closePokemonDialog();
     }
     if (event.key === 'ArrowLeft') {
+        event.preventDefault();
         moveToPokemon(-1);
     }
     if (event.key === 'ArrowRight') {
+        event.preventDefault();
         moveToPokemon(1);
     }
 }
@@ -85,7 +89,8 @@ function moveToPokemon(direction) {
 function renderPokemonDetails(pokemon) {
     const pokemonType = pokemon.types[0].type.name;
     const pokemonImage = pokemon.sprites.other['official-artwork'].front_default ||
-        pokemon.sprites.front_default;
+        pokemon.sprites.front_default ||
+        'assets/images/pokemon-placeholder.svg';
     const pokemonAbilities = [];
 
     for (let i = 0; i < pokemon.abilities.length; i++) {
@@ -98,9 +103,12 @@ function renderPokemonDetails(pokemon) {
         formatPokemonName(pokemon.name);
     document.querySelector('#dialog-id').textContent =
         `#${String(pokemon.id).padStart(4, '0')}`;
-    document.querySelector('#dialog-image').src = pokemonImage;
-    document.querySelector('#dialog-image').alt =
-        `${pokemon.name} official artwork`;
+    dialogPokemonImage.onerror = function () {
+        dialogPokemonImage.onerror = null;
+        dialogPokemonImage.src = 'assets/images/pokemon-placeholder.svg';
+    };
+    dialogPokemonImage.src = pokemonImage;
+    dialogPokemonImage.alt = `${pokemon.name} official artwork`;
     document.querySelector('#dialog-height').textContent =
         `${pokemon.height / 10} m`;
     document.querySelector('#dialog-weight').textContent =
@@ -150,6 +158,7 @@ function renderPokemonStats(pokemon) {
 }
 
 function resetEvolutionDisplay() {
+    evolutionRequestNumber++;
     document.querySelector('#evolution-chain').replaceChildren();
     evolutionButton.textContent = 'Show Evolution Chain';
     evolutionButton.disabled = false;
@@ -158,11 +167,17 @@ function resetEvolutionDisplay() {
 async function showEvolutionChain() {
     const pokemon = dialogPokemonList[dialogPokemonIndex];
     const evolutionContainer = document.querySelector('#evolution-chain');
+    evolutionRequestNumber++;
+    const currentRequest = evolutionRequestNumber;
     evolutionButton.disabled = true;
     evolutionContainer.textContent = 'Loading...';
 
     try {
         const evolutions = await getEvolutionChain(pokemon);
+        if (currentRequest !== evolutionRequestNumber) {
+            return;
+        }
+
         let evolutionNames = '';
         for (let i = 0; i < evolutions.length; i++) {
             if (i > 0) {
@@ -173,6 +188,10 @@ async function showEvolutionChain() {
         evolutionContainer.innerHTML = evolutionNames;
         evolutionButton.textContent = 'Evolution Chain Loaded';
     } catch (error) {
+        if (currentRequest !== evolutionRequestNumber) {
+            return;
+        }
+
         evolutionContainer.textContent = 'Evolution data could not be loaded.';
         evolutionButton.disabled = false;
     }

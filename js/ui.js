@@ -9,7 +9,8 @@ function formatPokemonName(name) {
 
 function getPokemonImage(pokemon) {
     return pokemon.sprites.other['official-artwork'].front_default ||
-        pokemon.sprites.front_default;
+        pokemon.sprites.front_default ||
+        'assets/images/pokemon-placeholder.svg';
 }
 
 function createPokemonCard(pokemon) {
@@ -27,6 +28,10 @@ function createPokemonCard(pokemon) {
         <img data-id="card-image" src="${getPokemonImage(pokemon)}" alt="${pokemon.name}" loading="lazy">
         <span class="card-bottom"><strong>${formatPokemonName(pokemon.name)}</strong><span class="card-types">${typeLabels}</span></span>
     </button>`;
+    const pokemonImage = listItem.querySelector('img');
+    pokemonImage.addEventListener('error', function () {
+        pokemonImage.src = 'assets/images/pokemon-placeholder.svg';
+    }, { once: true });
     listItem.firstElementChild.dataset.pokemonId = pokemon.id;
     listItem.firstElementChild.dataset.pokemonName = pokemon.name;
     return listItem;
