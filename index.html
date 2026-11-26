@@ -1,33 +1,73 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokedex</title>
-    <link rel="stylesheet" href="scripts/style/style.css">
-    <link rel="stylesheet" href="scripts/style/components.css">
-    <script src="scripts/js/main.js" defer></script>
-    <script src="scripts/js/pokedex.js" defer></script>
+    <meta name="description" content="A modern Pokédex for discovering Pokémon data.">
+    <title>Pokédex | Pokémon Explorer</title>
+    <link rel="icon" href="assets/pokeball.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/api.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="js/modal.js" defer></script>
+    <script src="js/main.js" defer></script>
 </head>
-<body onload="onloadFunc()">
-    <header>
-        <div class="header-logo">
-
-
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="#" aria-label="Pokédex home">
+                <span class="brand-mark" aria-hidden="true"><img src="assets/pokeball.svg" alt=""></span>
+                <span>Pokédex</span>
+            </a>
+            <form class="search-form" id="search-form" role="search">
+                <label class="sr-only" for="search-input">Search Pokémon by name or ID</label>
+                <input id="search-input" data-id="search-input" type="search" minlength="3" placeholder="Search Pokémon or ID" autocomplete="off">
+                <button id="search-button" data-id="search-button" type="submit" disabled aria-label="Search Pokémon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 1 0 4.68 13.37l4.22 4.22 1.42 1.42-4.22-4.22A7.5 7.5 0 0 0 10.5 3Zm0 2a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Z"/></svg>
+                    <span>Search</span>
+                </button>
+            </form>
         </div>
     </header>
-<main>
-<h1>Pokedex überschrifft</h1>
 
+    <main id="content" data-id="content" tabindex="-1">
+        <section class="intro" aria-labelledby="page-title">
+            <p class="eyebrow">National Pokédex</p>
+            <h1 id="page-title">Discover your favorite Pokémon</h1>
+        </section>
+        <div id="status-message" class="status-message" role="status" aria-live="polite"></div>
+        <p id="not-found" data-id="not-found" class="not-found" role="alert" aria-live="assertive" hidden>No Pokémon found</p>
+        <ul id="pokemon-list" class="pokemon-grid" aria-label="Pokémon results"></ul>
+        <button id="load-more-button" data-id="load-more-button" class="load-more-button" type="button"><span>Load More</span></button>
+    </main>
 
-
-<section id="poke-container">
-
-</section>
-</main>
-
-
-
-
+    <dialog id="pokemon-dialog" data-id="dialog" class="pokemon-dialog" aria-labelledby="dialog-name">
+        <div class="dialog-shell">
+            <button id="close-dialog-button" data-id="close-dialog-button" class="dialog-close" type="button" aria-label="Close dialog">×</button>
+            <div class="dialog-content">
+                <section class="dialog-visual">
+                    <div class="dialog-id" id="dialog-id"></div>
+                    <img id="dialog-image" data-id="dialog-image" src="" alt="">
+                    <div id="dialog-types" class="dialog-types"></div>
+                </section>
+                <section class="dialog-details">
+                    <p class="dialog-kicker">Pokémon details</p>
+                    <h2 id="dialog-name" data-id="overlay-pokemon-name"></h2>
+                    <div id="dialog-stats" class="stats-list"></div>
+                    <div class="detail-facts">
+                        <div><span>Height</span><strong id="dialog-height"></strong></div>
+                        <div><span>Weight</span><strong id="dialog-weight"></strong></div>
+                        <div><span>Abilities</span><strong id="dialog-abilities"></strong></div>
+                    </div>
+                    <button id="evolution-button" class="evolution-button" type="button">Show Evolution Chain</button>
+                    <div id="evolution-chain" class="evolution-chain" aria-live="polite"></div>
+                </section>
+            </div>
+            <nav class="dialog-navigation" aria-label="Pokémon navigation">
+                <button id="prev-button" data-id="prev-button" type="button" aria-label="Previous Pokémon">← <span>Previous</span></button>
+                <button id="next-button" data-id="next-button" type="button" aria-label="Next Pokémon"><span>Next</span> →</button>
+            </nav>
+        </div>
+    </dialog>
 </body>
 </html>
